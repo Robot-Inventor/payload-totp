@@ -8,6 +8,8 @@ import { useEffect } from 'react'
 
 import type { UserWithTotp } from '../../types.js'
 
+import { normalizePathname } from '../../utilities/normalizePathname.js'
+
 type Args = {
 	children: React.ReactNode
 	forceSetup?: boolean
@@ -21,6 +23,9 @@ export default function TOTPProviderClient(args: Args) {
 	const strategy = (user as any)?._strategy
 	const router = useRouter()
 	const pathname = usePathname()
+	const normalizedPathname = normalizePathname(pathname)
+	const normalizedVerifyUrl = normalizePathname(verifyUrl)
+	const normalizedSetupUrl = normalizePathname(setupUrl)
 
 	useEffect(() => {
 		if (
@@ -28,14 +33,14 @@ export default function TOTPProviderClient(args: Args) {
 			user.hasTotp &&
 			strategy &&
 			!['api-key', 'totp'].includes(strategy) &&
-			pathname !== verifyUrl
+			normalizedPathname !== normalizedVerifyUrl
 		) {
 			router.push(`${verifyUrl}?back=${encodeURIComponent(pathname)}`)
 		} else if (
 			user &&
 			!user.hasTotp &&
 			forceSetup &&
-			pathname !== setupUrl &&
+			normalizedPathname !== normalizedSetupUrl &&
 			strategy !== 'api-key'
 		) {
 			router.push(`${setupUrl}?back=${encodeURIComponent(pathname)}`)
